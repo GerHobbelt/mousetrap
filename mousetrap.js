@@ -187,7 +187,15 @@
          *
          * @type {boolean|string}
          */
-        _nextExpectedAction = false;
+        _nextExpectedAction = false,
+
+        /**
+         * timeout
+         * The number of milliseconds until buffer gets cleared
+         *
+         * @type {number}
+         */
+        _timeout = 1000;
 
     /**
      * loop through the f keys, f1 to f19 and add them to the map
@@ -571,7 +579,7 @@
      */
     function _resetSequenceTimer() {
         clearTimeout(_resetTimer);
-        _resetTimer = setTimeout(_resetSequences, 1000);
+        _resetTimer = setTimeout(_resetSequences, _timeout);
     }
 
     /**
@@ -816,7 +824,10 @@
      * @param {string|undefined} action
      * @returns void
      */
-    function _bindMultiple(combinations, callback, action) {
+    function _bindMultiple(combinations, callback, action, timeout) {
+        if (timeout != undefined) {
+            _timeout = timeout;
+        }
         for (var i = 0; i < combinations.length; ++i) {
             _bindSingle(combinations[i], callback, action);
         }
@@ -843,9 +854,9 @@
          * @param {string=} action - 'keypress', 'keydown', or 'keyup'
          * @returns void
          */
-        bind: function(keys, callback, action) {
+        bind: function(keys, callback, action, timeout) {
             keys = keys instanceof Array ? keys : [keys];
-            _bindMultiple(keys, callback, action);
+            _bindMultiple(keys, callback, action, timeout);
             return this;
         },
 
