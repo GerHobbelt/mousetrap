@@ -1,5 +1,10 @@
 /*global define:false */
 /**
+ * This file is a forked version of Craig Campbell's Mousetrap that
+ * requires jQuery and passes single, optionally namespaced key listeners
+ * using "on" and "off".
+ *  
+ * 
  * Copyright 2013 Craig Campbell
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +25,11 @@
  * @version 1.4.5
  * @url craig.is/killing/mice
  */
+
+// .contains polyfill
+if ( ! ('contains' in String.prototype))
+    String.prototype.contains = function(str, startIndex) { return -1!==this.indexOf(str, startIndex); };
+
 (function(window, document, undefined) {
 
     /**
@@ -146,13 +156,6 @@
         _callbacks = {},
 
         /**
-         * direct map of string combinations to callbacks used for trigger()
-         *
-         * @type {Object}
-         */
-        _directMap = {},
-
-        /**
          * keeps track of what level each sequence is at since multiple
          * sequences can start out with the same sequence
          *
@@ -202,23 +205,6 @@
      */
     for (i = 0; i <= 9; ++i) {
         _MAP[i + 96] = i;
-    }
-
-    /**
-     * cross browser add event method
-     *
-     * @param {Element|HTMLDocument} object
-     * @param {string} type
-     * @param {Function} callback
-     * @returns void
-     */
-    function _addEvent(object, type, callback) {
-        if (object.addEventListener) {
-            object.addEventListener(type, callback, false);
-            return;
-        }
-
-        object.attachEvent('on' + type, callback);
     }
 
     /**
@@ -522,36 +508,6 @@
     }
 
     /**
-     * handles a keydown event
-     *
-     * @param {Event} e
-     * @returns void
-     */
-    function _handleKeyEvent(e) {
-
-        // normalize e.which for key events
-        // @see http://stackoverflow.com/questions/4285627/javascript-keycode-vs-charcode-utter-confusion
-        if (typeof e.which !== 'number') {
-            e.which = e.keyCode;
-        }
-
-        var character = _characterFromEvent(e);
-
-        // no character found then stop
-        if (!character) {
-            return;
-        }
-
-        // need to use === for the character check because the character can be 0
-        if (e.type == 'keyup' && _ignoreNextKeyup === character) {
-            _ignoreNextKeyup = false;
-            return;
-        }
-
-        Mousetrap.handleKey(character, _eventModifiers(e), e);
-    }
-
-    /**
      * determines if the keycode specified is a modifier key or not
      *
      * @param {string} key
@@ -559,19 +515,6 @@
      */
     function _isModifier(key) {
         return key == 'shift' || key == 'ctrl' || key == 'alt' || key == 'meta';
-    }
-
-    /**
-     * called to set a 1 second timeout on the specified sequence
-     *
-     * this is so after each key press in the sequence you have 1 second
-     * to press the next key before you have to start over
-     *
-     * @returns void
-     */
-    function _resetSequenceTimer() {
-        clearTimeout(_resetTimer);
-        _resetTimer = setTimeout(_resetSequences, 1000);
     }
 
     /**
@@ -607,141 +550,39 @@
      * @param {string=} action passed in
      */
     function _pickBestAction(key, modifiers, action) {
-
+        
         // if no action was picked in we should try to pick the one
         // that we think would work best for this key
         if (!action) {
+            throw 'Pick best action inner not programmed.';
             action = _getReverseMap()[key] ? 'keydown' : 'keypress';
         }
 
         // modifier keys don't work as expected with keypress,
         // switch to keydown
-        if (action == 'keypress' && modifiers.length) {
-            action = 'keydown';
+        if (action.contains('keypress') && modifiers.length) {
+            action = action.replace("keypress", "keydown", "gi");
         }
 
         return action;
     }
 
     /**
-     * binds a key sequence to an event
+     * Gets info for a specific key
      *
-     * @param {string} combo - combo specified in bind call
-     * @param {Array} keys
-     * @param {Function} callback
-     * @param {string=} action
-     * @returns void
-     */
-    function _bindSequence(combo, keys, callback, action) {
-
-        // start off by adding a sequence level record for this combination
-        // and setting the level to 0
-        _sequenceLevels[combo] = 0;
-
-        /**
-         * callback to increase the sequence level for this sequence and reset
-         * all other sequences that were active
-         *
-         * @param {string} nextAction
-         * @returns {Function}
-         */
-        function _increaseSequence(nextAction) {
-            return function() {
-                _nextExpectedAction = nextAction;
-                ++_sequenceLevels[combo];
-                _resetSequenceTimer();
-            };
-        }
-
-        /**
-         * wraps the specified callback inside of another function in order
-         * to reset all sequence counters as soon as this sequence is done
-         *
-         * @param {Event} e
-         * @returns void
-         */
-        function _callbackAndReset(e) {
-            _fireCallback(callback, e, combo);
-
-            // we should ignore the next key up if the action is key down
-            // or keypress.  this is so if you finish a sequence and
-            // release the key the final key will not trigger a keyup
-            if (action !== 'keyup') {
-                _ignoreNextKeyup = _characterFromEvent(e);
-            }
-
-            // weird race condition if a sequence ends with the key
-            // another sequence begins with
-            setTimeout(_resetSequences, 10);
-        }
-
-        // loop through keys one at a time and bind the appropriate callback
-        // function.  for any key leading up to the final one it should
-        // increase the sequence. after the final, it should reset all sequences
-        //
-        // if an action is specified in the original bind call then that will
-        // be used throughout.  otherwise we will pass the action that the
-        // next key in the sequence should match.  this allows a sequence
-        // to mix and match keypress and keydown events depending on which
-        // ones are better suited to the key provided
-        for (var i = 0; i < keys.length; ++i) {
-            var isFinal = i + 1 === keys.length;
-            var wrappedCallback = isFinal ? _callbackAndReset : _increaseSequence(action || _getKeyInfo(keys[i + 1]).action);
-            _bindSingle(keys[i], wrappedCallback, action, combo, i);
-        }
-    }
-
-    /**
-     * Converts from a string key combination to an array
-     *
-     * @param  {string} combination like "command+shift+l"
-     * @return {Array}
-     */
-    function _keysFromString(combination) {
-        if (combination === '+') {
-            return ['+'];
-        }
-
-        return combination.split('+');
-    }
-
-    /**
-     * Gets info for a specific key combination
-     *
-     * @param  {string} combination key combination ("command+s" or "a" or "*")
+     * @param  {string} key name
      * @param  {string=} action
      * @returns {Object}
      */
-    function _getKeyInfo(combination, action) {
-        var keys,
-            key,
-            i,
-            modifiers = [];
+    function _getKeyInfo(key, action) {
+        var modifiers = [];
 
-        // take the keys from this pattern and figure out what the actual
-        // pattern is all about
-        keys = _keysFromString(combination);
-
-        for (i = 0; i < keys.length; ++i) {
-            key = keys[i];
-
-            // normalize key names
-            if (_SPECIAL_ALIASES[key]) {
-                key = _SPECIAL_ALIASES[key];
-            }
-
-            // if this is not a keypress event then we should
-            // be smart about using shift keys
-            // this will only work for US keyboards however
-            if (action && action != 'keypress' && _SHIFT_MAP[key]) {
-                key = _SHIFT_MAP[key];
-                modifiers.push('shift');
-            }
-
-            // if this key is a modifier then add it to the list of modifiers
-            if (_isModifier(key)) {
-                modifiers.push(key);
-            }
+        // if this is not a keypress event then we should
+        // be smart about using shift keys
+        // this will only work for US keyboards however
+        if (action && !action.contains('keypress') && _SHIFT_MAP[key]) {
+            key = _SHIFT_MAP[key];
+            modifiers.push('shift');
         }
 
         // depending on what the key combination is
@@ -761,71 +602,76 @@
      * @param {string} combination
      * @param {Function} callback
      * @param {string=} action
-     * @param {string=} sequenceName - name of sequence if part of sequence
-     * @param {number=} level - what part of the sequence the command is
      * @returns void
      */
-    function _bindSingle(combination, callback, action, sequenceName, level) {
+    function _bindKey(combination, callback, action) {
 
-        // store a direct mapped reference for use with Mousetrap.trigger
-        _directMap[combination + ':' + action] = callback;
-
-        // make sure multiple spaces in a row become a single space
-        combination = combination.replace(/\s+/g, ' ');
-
-        var sequence = combination.split(' '),
-            info;
-
-        // if this pattern is a sequence of keys then run through this method
-        // to reprocess each pattern one key at a time
-        if (sequence.length > 1) {
-            _bindSequence(combination, sequence, callback, action);
-            return;
-        }
+        var info;
 
         info = _getKeyInfo(combination, action);
 
-        // make sure to initialize array if this is the first time
-        // a callback is added for this key
-        _callbacks[info.key] = _callbacks[info.key] || [];
-
-        // remove an existing match if there is one
-        _getMatches(info.key, info.modifiers, {type: info.action}, sequenceName, combination, level);
-
-        // add this call back to the array
-        // if it is a sequence put it at the beginning
-        // if not put it at the end
-        //
-        // this is important because the way these are processed expects
-        // the sequence ones to come first
-        _callbacks[info.key][sequenceName ? 'unshift' : 'push']({
+        _jqueryBind({
             callback: callback,
             modifiers: info.modifiers,
             action: info.action,
-            seq: sequenceName,
-            level: level,
-            combo: combination
+            key: combination
         });
     }
 
     /**
-     * binds multiple combinations to the same callback
-     *
-     * @param {Array} combinations
-     * @param {Function} callback
-     * @param {string|undefined} action
-     * @returns void
+     * Passes the bind through to jQuery
+     * 
+     * @param  {Array} options
      */
-    function _bindMultiple(combinations, callback, action) {
-        for (var i = 0; i < combinations.length; ++i) {
-            _bindSingle(combinations[i], callback, action);
-        }
+    function _jqueryBind(opts) {
+        $(window).on(opts.action, function(e) {
+            // normalize e.which for key events
+            // @see http://stackoverflow.com/questions/4285627/javascript-keycode-vs-charcode-utter-confusion
+            if (typeof e.which !== 'number') {
+                e.which = e.keyCode;
+            }
+
+            var character = _characterFromEvent(e);
+
+            // no character found then stop
+            if (!character) {
+                return;
+            }
+
+            if (character == opts.key) {
+                opts.callback();
+            }
+        });
     }
 
-    // start!
-    _addEvent(document, 'keypress', _handleKeyEvent);
-    _addEvent(document, 'keydown', _handleKeyEvent);
-    _addEvent(document, 'keyup', _handleKeyEvent);
+    /**
+     * unbinds a single keyboard combination
+     *
+     * @param {string} combination
+     * @param {string=} action
+     * @returns void
+     */
+    function _unbindKey(combination, action) {
+
+        var info;
+
+        info = _getKeyInfo(combination, action);
+
+        _jqueryUnbind({
+            modifiers: info.modifiers,
+            action: info.action,
+            key: combination
+        });
+    }
+
+    /**
+     * Passes the unbind through to jQuery
+     * 
+     * @param  {Array} options
+     */
+    function _jqueryUnbind(opts) {
+        $(window).off(opts.action);
+    }
 
     var Mousetrap = {
 
@@ -838,15 +684,13 @@
          * be sure to list the modifier keys first to make sure that the
          * correct key ends up getting bound (the last key in the pattern)
          *
-         * @param {string|Array} keys
+         * @param {string} keys
+         * @param {string=} action - 'keypress', 'keydown', or 'keyup' with optional namespace
          * @param {Function} callback
-         * @param {string=} action - 'keypress', 'keydown', or 'keyup'
          * @returns void
          */
-        bind: function(keys, callback, action) {
-            keys = keys instanceof Array ? keys : [keys];
-            _bindMultiple(keys, callback, action);
-            return this;
+        bind: function(keys, action, callback) {
+            _bindKey(keys, callback, action);
         },
 
         /**
@@ -862,57 +706,12 @@
          * the keycombo+action has to be exactly the same as
          * it was defined in the bind method
          *
-         * @param {string|Array} keys
-         * @param {string} action
+         * @param {string} keys
+         * @param {string} action with optional namespace
          * @returns void
          */
         unbind: function(keys, action) {
-            return Mousetrap.bind(keys, function() {}, action);
-        },
-
-        /**
-         * triggers an event that has already been bound
-         *
-         * @param {string} keys
-         * @param {string=} action
-         * @returns void
-         */
-        trigger: function(keys, action) {
-            if (_directMap[keys + ':' + action]) {
-                _directMap[keys + ':' + action]({}, keys);
-            }
-            return this;
-        },
-
-        /**
-         * resets the library back to its initial state.  this is useful
-         * if you want to clear out the current keyboard shortcuts and bind
-         * new ones - for example if you switch to another page
-         *
-         * @returns void
-         */
-        reset: function() {
-            _callbacks = {};
-            _directMap = {};
-            return this;
-        },
-
-       /**
-        * should we stop this event before firing off callbacks
-        *
-        * @param {Event} e
-        * @param {Element} element
-        * @return {boolean}
-        */
-        stopCallback: function(e, element) {
-
-            // if the element has the class "mousetrap" then no need to stop
-            if ((' ' + element.className + ' ').indexOf(' mousetrap ') > -1) {
-                return false;
-            }
-
-            // stop for input, select, and textarea
-            return element.tagName == 'INPUT' || element.tagName == 'SELECT' || element.tagName == 'TEXTAREA' || element.isContentEditable;
+            _unbindKey(keys, action);
         },
 
         /**
@@ -922,10 +721,10 @@
     };
 
     // expose mousetrap to the global object
-    window.Mousetrap = Mousetrap;
+    window.jTrap = Mousetrap;
 
     // expose mousetrap as an AMD module
     if (typeof define === 'function' && define.amd) {
-        define(Mousetrap);
+        define(jTrap);
     }
 }) (window, document);

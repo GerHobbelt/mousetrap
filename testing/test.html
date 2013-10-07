@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html class="no-js">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<title></title>
+		<meta name="description" content="">
+		<style>
+			#unbindbutton {
+				left: 1em;
+				position: absolute;
+				top: 1em;
+			}
+		</style>
+	</head>
+	<body>
+		<a href="#" id="unbindbutton">Un-bind</a>
+
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+		<script>window.jQuery || document.write('<script src="jquery.min.js"><\/script>')</script>
+		<script src="../mousetrap-jquery-namespaced.js"></script>
+		<script>
+			$(function() {
+				var $unbindbutton = $('#unbindbutton'),
+					posx = 1,
+					posy = 1;
+
+				$unbindbutton.on('click', function() {
+					jTrap.unbind('a', 'keypress.c');
+				});
+
+				jTrap.bind('?', 'keypress', function() {
+					console.log('TRIG ?'); 
+				});
+
+				jTrap.bind('left', 'keydown.left', function() {
+					console.log('TRIG left');
+					posx--;
+					$unbindbutton.css('left', posx + 'em')
+				});
+				jTrap.bind('right', 'keydown.right', function() {
+					console.log('TRIG right');
+					posx++;
+					$unbindbutton.css('left', posx + 'em')
+				});
+
+				jTrap.bind('down', 'keydown.down', function() {
+					console.log('TRIG down');
+					posy++;
+					$unbindbutton.css('top', posy + 'em')
+				});
+				jTrap.bind('up', 'keydown.up', function() {
+					console.log('TRIG up');
+					posy--;
+					$unbindbutton.css('top', posy + 'em')
+				});
+			});
+		</script>
+
+	</body>
+</html>
