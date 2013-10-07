@@ -1,3 +1,9 @@
+# jTrap
+
+jTrap is a fork of Mousetrap that replaces Mousetrap's custom, JS-only listener system with calls to jQuery .on() and .off() for the purpose of allowing for namespacing of events.
+
+As a result, the size and dependencies and much of the functionality is different.
+
 # Mousetrap
 
 Mousetrap is a simple library for handling keyboard shortcuts in Javascript.
