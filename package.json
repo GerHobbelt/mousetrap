@@ -1,8 +1,8 @@
 {
-  "name": "Mousetrap",
-  "version": "1.4.5",
-  "description": "Simple library for handling keyboard shortcuts",
-  "main": "mousetrap.js",
+  "name": "jTrap",
+  "version": "1.0.0",
+  "description": "Simple library for handling keyboard shortcuts--forked Mousetrap to use jQuery handlers",
+  "main": "jtrap.js",
   "directories": {
     "test": "tests"
   },
@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/ccampbell/mousetrap.git"
+    "url": "git://github.com/mattstauffer/jtrap.git"
   },
   "keywords": [
     "keyboard",
     "shortcuts",
     "events"
   ],
-  "author": "Craig Campbell",
+  "author": "Craig Campbell - Modded by Matt Stauffer",
   "license": "Apache 2.0",
   "gitHead": "c202a0bd4967d5a3064f9cb376db51dec9345336",
   "readmeFilename": "README.md",
