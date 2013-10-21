@@ -17,10 +17,10 @@
  * Mousetrap is a simple keyboard shortcut library for Javascript with
  * no external dependencies
  *
- * @version 1.4.4
+ * @version 1.4.5
  * @url craig.is/killing/mice
  */
-(function() {
+(function(window, document, undefined) {
 
     /**
      * provides all of Mousetrap's functionality on a specific DOM element
@@ -152,11 +152,25 @@
             _callbacks = {},
 
             /**
+	         * a stack of lists of callbacks, to be used via Mousetrap.save() and Mousetrap.restore
+	         *
+	         * @type {Array}
+	         */
+	        _callbacksStack = [],
+
+	        /**
              * direct map of string combinations to callbacks used for trigger()
              *
              * @type {Object}
              */
             _directMap = {},
+
+	        /**
+	         * a stack of lists of direct maps, to be used via Mousetrap.save() and Mousetrap.restore
+	         *
+	         * @type {Array}
+	         */
+	        _directMapStack = [],
 
             /**
              * keeps track of what level each sequence is at since multiple
@@ -426,10 +440,10 @@
          * @param {Event} e
          * @returns void
          */
-        function _fireCallback(callback, e, combo) {
+	    function _fireCallback(callback, e, combo, sequence) {
 
             // if this event should not happen stop here
-            if (_wrapper.stopCallback(e, e.target || e.srcElement, combo)) {
+            if (_wrapper.stopCallback(e, e.target || e.srcElement, combo, sequence)) {
                 return;
             }
 
@@ -495,7 +509,7 @@
 
                     // keep a list of which sequences were matches for later
                     doNotReset[callbacks[i].seq] = 1;
-                    _fireCallback(callbacks[i].callback, e, callbacks[i].combo);
+	                _fireCallback(callbacks[i].callback, e, callbacks[i].combo, callbacks[i].seq);
                     continue;
                 }
 
@@ -928,6 +942,38 @@
                 return this;
             },
 
+	        /**
+	         * saves the current state of the library in a stack fashion.  this is useful
+	         * if you want to clear out the current keyboard shortcuts and bind
+	         * new ones but are interested in recovering the previous
+	         * state after - for example if you are showing some sort of modal dialog
+	         *
+	         * @returns void
+	         */
+	        save: function() {
+	            _callbacksStack.push(_callbacks);
+	            _directMapStack.push(_directMap);
+	            _callbacks = {};
+	            _directMap = {};
+	            return this;
+	        },
+
+	        /**
+	         * restores the current state of the library in a stack fashion.  this is useful
+	         * if you want to clear out the current keyboard shortcuts and bind
+	         * new ones but are interested in recovering the previous
+	         * state after - for example if you are showing some sort of modal dialog
+	         *
+	         * @returns void
+	         */
+	        restore: function() {
+	            if ((_callbacksStack.length > 0) && (_directMapStack.length > 0)) {
+	                _callbacks = _callbacksStack.pop();
+	                _directMap = _directMapStack.pop();
+	            }
+	            return this;
+	        },
+
            /**
             * should we stop this event before firing off callbacks
             *
@@ -948,7 +994,7 @@
                 }
 
                 // stop for input, select, and textarea
-                return element.tagName == 'INPUT' || element.tagName == 'SELECT' || element.tagName == 'TEXTAREA' || (element.contentEditable && element.contentEditable == 'true');
+	            return element.tagName == 'INPUT' || element.tagName == 'SELECT' || element.tagName == 'TEXTAREA' || element.tagName == 'OBJECT' || element.tagName == 'EMBED' || element.isContentEditable;
             },
 
             /**
@@ -969,4 +1015,4 @@
     if (typeof define === 'function' && define.amd) {
         define(Mousetrap);
     }
-}) ();
+}) (window, document);
