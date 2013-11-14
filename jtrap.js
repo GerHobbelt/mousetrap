@@ -639,7 +639,7 @@ if ( ! ('contains' in String.prototype))
             }
 
             if (character == opts.key) {
-                opts.callback();
+                opts.callback(e);
             }
         });
     }
