@@ -59,7 +59,7 @@
         /**
          * mapping for special characters so they can support
          *
-         * this dictionary is only used incase you want to bind a
+         * this dictionary is only used in case you want to bind a
          * keyup or keydown event to one of these keys
          *
          * @type {Object}
@@ -69,19 +69,7 @@
             107: '+',
             109: '-',
             110: '.',
-            111 : '/',
-            112: 'f1',
-            113: 'f2',
-            114: 'f3',
-            115: 'f4',
-            116: 'f5',
-            117: 'f6',
-            118: 'f7',
-            119: 'f8',
-            120: 'f9',
-            121: 'f10',
-            122: 'f11',
-            123: 'f12',
+            111: '/',
             186: ';',
             187: '=',
             188: ',',
@@ -97,7 +85,7 @@
 
         /**
          * this is a mapping of keys that require shift on a US keypad
-         * back to the non shift equivelents
+         * back to the non shift equivalents
          *
          * this is so you can use keyup events with these keys
          *
@@ -223,10 +211,10 @@
         _keySequenceDelay = 1000;
 
     /**
-     * loop through the f keys, f1 to f19 and add them to the map
-     * programatically
+     * loop through the f keys, f1 to f24 and add them to the map
+     * programmatically
      */
-    for (var i = 1; i < 20; ++i) {
+    for (var i = 1; i <= 24; ++i) {
         _MAP[111 + i] = 'f' + i;
     }
 
@@ -261,9 +249,8 @@
      * @return {string}
      */
     function _characterFromEvent(e) {
-
         // for keypress events we should return the character as is
-        if (e.type == 'keypress') {
+        if (e.type === 'keypress') {
             var character = String.fromCharCode(e.which);
 
             // if the shift key is not pressed then it is safe to assume
@@ -359,7 +346,7 @@
         }
 
         // if a modifier key is coming up on its own we should allow it
-        if (action == 'keyup' && _isModifier(character)) {
+        if (action === 'keyup' && _isModifier(character)) {
             modifiers = [character];
         }
 
@@ -370,13 +357,13 @@
 
             // if a sequence name is not specified, but this is a sequence at
             // the wrong level then move onto the next match
-            if (!sequenceName && callback.seq && _sequenceLevels[callback.seq] != callback.level) {
+            if (!sequenceName && callback.seq && _sequenceLevels[callback.seq] !== callback.level) {
                 continue;
             }
 
             // if the action we are looking for doesn't match the action we got
             // then we should keep going
-            if (action != callback.action) {
+            if (action !== callback.action) {
                 continue;
             }
 
@@ -387,15 +374,15 @@
             // chrome will not fire a keypress if meta or control is down
             // safari will fire a keypress if meta or meta+shift is down
             // firefox will fire a keypress if meta or control is down
-            if ((action == 'keypress' && !e.metaKey && !e.ctrlKey) || _modifiersMatch(modifiers, callback.modifiers)) {
+            if ((action === 'keypress' && !e.metaKey && !e.ctrlKey) || _modifiersMatch(modifiers, callback.modifiers)) {
 
                 // when you bind a combination or sequence a second time it
                 // should overwrite the first one.  if a sequenceName or
                 // combination is specified in this call it does just that
                 //
                 // @todo make deleting its own method?
-                var deleteCombo = !sequenceName && callback.combo == combination;
-                var deleteSequence = sequenceName && callback.seq == sequenceName && callback.level == level;
+                var deleteCombo = !sequenceName && callback.combo === combination;
+                var deleteSequence = sequenceName && callback.seq === sequenceName && callback.level === level;
                 if (deleteCombo || deleteSequence) {
                     _callbacks[character].splice(i, 1);
                 }
@@ -451,7 +438,7 @@
     }
 
     /**
-     * stops propogation for this event
+     * stops propagation for this event
      *
      * @param {Event} e
      * @returns void
@@ -469,7 +456,7 @@
      * actually calls the callback function
      *
      * if your callback function returns false this will use the jquery
-     * convention - prevent default and stop propogation on the event
+     * convention - prevent default and stop propagation on the event
      *
      * @param {Function} callback
      * @param {Event} e
@@ -528,7 +515,7 @@
                 //
                 // any sequences that do not match here will be discarded
                 // below by the _resetSequences call
-                if (callbacks[i].level != maxLevel) {
+                if (callbacks[i].level !== maxLevel) {
                     continue;
                 }
 
@@ -548,7 +535,7 @@
         }
 
         // if the key you pressed matches the type of sequence without
-        // being a modifier (ie "keyup" or "keypress") then we should
+        // being a modifier (i.e. "keyup" or "keypress") then we should
         // reset all sequences that were not matched by this event
         //
         // this is so, for example, if you have the sequence "h a t" and you
@@ -568,12 +555,12 @@
         //
         // we ignore keypresses in a sequence that directly follow a keydown
         // for the same character
-        var ignoreThisKeypress = e.type == 'keypress' && _ignoreNextKeypress;
-        if (e.type == _nextExpectedAction && !_isModifier(character) && !ignoreThisKeypress) {
+        var ignoreThisKeypress = e.type === 'keypress' && _ignoreNextKeypress;
+        if (e.type === _nextExpectedAction && !_isModifier(character) && !ignoreThisKeypress) {
             _resetSequences(doNotReset);
         }
 
-        _ignoreNextKeypress = processedSequenceCallback && e.type == 'keydown';
+        _ignoreNextKeypress = processedSequenceCallback && e.type === 'keydown';
     }
 
     /**
@@ -598,7 +585,7 @@
         }
 
         // need to use === for the character check because the character can be 0
-        if (e.type == 'keyup' && _ignoreNextKeyup === character) {
+        if (e.type === 'keyup' && _ignoreNextKeyup === character) {
             _ignoreNextKeyup = false;
             return;
         }
@@ -613,7 +600,7 @@
      * @returns {boolean}
      */
     function _isModifier(key) {
-        return key == 'shift' || key == 'ctrl' || key == 'alt' || key == 'meta';
+        return key === 'shift' || key === 'ctrl' || key === 'alt' || key === 'meta';
     }
 
     /**
@@ -671,7 +658,7 @@
 
         // modifier keys don't work as expected with keypress,
         // switch to keydown
-        if (action == 'keypress' && modifiers.length) {
+        if (action === 'keypress' && modifiers.length) {
             action = 'keydown';
         }
 
@@ -753,11 +740,19 @@
      * @return {Array}
      */
     function _keysFromString(combination) {
-        if (combination === '+') {
-            return ['+'];
+        var a = combination.split('+');
+        // cope with both "+" and combo's like "shift+ctrl++"
+        var end = a.length - 1;
+        if (end > 0 && a[end] === "") {
+            a.pop();
+            end--;
         }
-
-        return combination.split('+');
+        for (var i = 0; i <= end; i++) {
+            if (a[i] === "") {
+                a[i] = "+";
+            }
+        }
+        return a;
     }
 
     /**
@@ -869,11 +864,13 @@
      * @param {Array} combinations
      * @param {Function} callback
      * @param {string|undefined} action
+     * @param {number|undefined} timeout maximum allowed delay until the next key. Note that this will replace the Mousetrap global key delay timeout.
      * @returns void
      */
     function _bindMultiple(combinations, callback, action, timeout) {
         if (timeout != null) {
-            _keySequenceDelay = timeout;
+            // only set the timeout when an actual value was provided:
+            Mousetrap.setKeySequenceDelay(timeout);
         }
         for (var i = 0; i < combinations.length; ++i) {
             _bindSingle(combinations[i], callback, action);
@@ -987,15 +984,14 @@
             return this;
         },
 
-       /**
-        * should we stop this event before firing off callbacks
-        *
-        * @param {Event} e
-        * @param {Element} element
-        * @return {boolean}
-        */
+        /**
+         * should we stop this event before firing off callbacks?
+         *
+         * @param {Event} e
+         * @param {Element} element
+         * @return {boolean}
+         */
         stopCallback: function(e, element) {
-
             // if the element has the class "mousetrap" then no need to stop
             if ((' ' + element.className + ' ').indexOf(' mousetrap ') > -1) {
                 return false;
@@ -1008,11 +1004,13 @@
         /**
          * sets the delay between recognized keypresses in a sequence
          *
-         * @param {Number} timeout
+         * @param {Number} timeout in milliseconds. When set to zero (null or other 'falsey' JS value) the default value of 1000 (1 second) is restored.
          * @returns void
          */
         setKeySequenceDelay: function(timeout) {
-            if (timeout > 10) {
+            if (!timeout) {
+                _keySequenceDelay = 1000;
+            } else if (timeout > 10) {
                 _keySequenceDelay = timeout;
             } else {
                 throw "Mousetrap: Unable to set timeout to " + timeout;
