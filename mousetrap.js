@@ -20,7 +20,22 @@
  * @version 1.4.6
  * @url craig.is/killing/mice
  */
-(function(window, document, undefined) {
+(function (root, document, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define([], function () {
+            return (root.Mousetrap = factory(document));
+        });
+    } else if (typeof exports === 'object') {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like environments that support module.exports,
+        // like Node.
+        module.exports = factory(document);
+    } else {
+        // Browser globals
+        root.Mousetrap = factory(document);
+    }
+}(this, document, function (document) {
 
     /**
      * mapping of special keycodes to their corresponding keys
@@ -1052,10 +1067,5 @@
     };
 
     // expose mousetrap to the global object
-    window.Mousetrap = Mousetrap;
-
-    // expose mousetrap as an AMD module
-    if (typeof define === 'function' && define.amd) {
-        define(Mousetrap);
-    }
-}) (window, document);
+    return Mousetrap;
+}));
