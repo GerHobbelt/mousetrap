@@ -985,6 +985,18 @@
         },
 
         /**
+         * returns defined callback for specific keys 
+         *
+         * @param {String/Array} keys
+         * @param {String} action
+         * @returns {Function} callback for keys
+         */
+        getCallback: function(keys, action)
+        {
+            return _directMap[keys + ':' + action];
+        },
+
+        /**
          * should we stop this event before firing off callbacks?
          *
          * @param {Event} e
