@@ -491,6 +491,19 @@ describe('Mousetrap.bind', function() {
             expect(spy.callCount).to.equal(0, 'sequence callback should not fire');
             clock.restore();
         });
+
+        it('custom sequences timeout', function() {
+            var spy = sinon.spy();
+            var clock = sinon.useFakeTimers();
+
+            Mousetrap.bind('g t', spy, 100);
+            KeyEvent.simulate('g'.charCodeAt(0), 71);
+            clock.tick(200);
+            KeyEvent.simulate('t'.charCodeAt(0), 84);
+
+            expect(spy.callCount).to.equal(0, 'sequence callback should not fire');
+            clock.restore();
+        });
     });
 
     describe('default actions', function() {
