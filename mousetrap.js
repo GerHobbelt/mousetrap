@@ -216,12 +216,11 @@
         _nextExpectedAction = false,
 
         /**
-         * timeout
-         * The number of milliseconds until buffer gets cleared
+         * set the delay between keypresses to a number in ms
          *
          * @type {number}
          */
-        _timeout = 1000;
+        _keySequenceDelay = 1000;
 
     /**
      * loop through the f keys, f1 to f19 and add them to the map
@@ -618,7 +617,7 @@
     }
 
     /**
-     * called to set a 1 second timeout on the specified sequence
+     * called to set a {_keySequenceDelay} timeout on the specified sequence
      *
      * this is so after each key press in the sequence you have 1 second
      * to press the next key before you have to start over
@@ -627,7 +626,7 @@
      */
     function _resetSequenceTimer() {
         clearTimeout(_resetTimer);
-        _resetTimer = setTimeout(_resetSequences, _timeout);
+        _resetTimer = setTimeout(_resetSequences, _keySequenceDelay);
     }
 
     /**
@@ -873,8 +872,8 @@
      * @returns void
      */
     function _bindMultiple(combinations, callback, action, timeout) {
-        if (timeout != undefined) {
-            _timeout = timeout;
+        if (timeout != null) {
+            _keySequenceDelay = timeout;
         }
         for (var i = 0; i < combinations.length; ++i) {
             _bindSingle(combinations[i], callback, action);
@@ -1004,6 +1003,20 @@
 
             // stop for input, select, and textarea
             return element.tagName == 'INPUT' || element.tagName == 'SELECT' || element.tagName == 'TEXTAREA' || element.tagName == 'OBJECT' || element.tagName == 'EMBED' || element.isContentEditable;
+        },
+
+        /**
+         * sets the delay between recognized keypresses in a sequence
+         *
+         * @param {Number} timeout
+         * @returns void
+         */
+        setKeySequenceDelay: function(timeout) {
+            if (timeout > 10) {
+                _keySequenceDelay = timeout;
+            } else {
+                throw "Mousetrap: Unable to set timeout to " + timeout;
+            }
         },
 
         /**
