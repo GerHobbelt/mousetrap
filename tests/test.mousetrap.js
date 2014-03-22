@@ -578,3 +578,28 @@ describe('Mousetrap.unbind', function() {
         expect(spy.callCount).to.equal(3, 'callback should not fire after unbind');
     });
 });
+
+describe('Mousetrap.getMap', function() {
+    it('returns mapping', function() {
+      expect(Mousetrap.getMap()).not.to.equal(undefined);
+    });
+});
+
+describe('Mousetrap.getReverseMap', function() {
+    it('returns mapping', function() {
+      expect(Mousetrap.getReverseMap()).not.to.equal(undefined);
+    });
+});
+
+describe('Mousetrap.getKeycodeMap', function() {
+    it('returns mapping', function() {
+      expect(Mousetrap.getKeycodeMap()).not.to.equal(undefined);
+    });
+});
+
+
+describe('Mousetrap.getShiftMap', function() {
+    it('returns mapping', function() {
+      expect(Mousetrap.getShiftMap()).not.to.equal(undefined);
+    });
+});
