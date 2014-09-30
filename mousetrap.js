@@ -130,6 +130,12 @@
         },
 
         /**
+         * reused function for unbinding
+         * @type Function
+         */
+        _NOOP = function() {},
+
+        /**
          * variable to store the flipped version of _MAP from above
          * needed to check if we should use keypress or not when no action
          * is specified
@@ -889,7 +895,7 @@
          * @returns void
          */
         unbind: function(keys, action) {
-            return Mousetrap.bind(keys, function() {}, action);
+            return Mousetrap.bind(keys, _NOOP, action);
         },
 
         /**
