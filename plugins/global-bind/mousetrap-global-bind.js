@@ -30,7 +30,24 @@ Mousetrap = (function(Mousetrap) {
         }
 
         _globalCallbacks[keys] = true;
+
+        return Mousetrap;
     };
+
+    Mousetrap.unbindGlobal = function(keys, action) {
+        Mousetrap.unbind(keys, action);
+
+        if(Array.isArray(keys)) {
+            for(var i = 0; i < keys.length; i++) {
+                _globalCallbacks[keys[i]] = false;
+            }
+            return
+        }
+
+        _globalCallbacks[keys] = false;
+
+        return Mousetrap;
+    }
 
     return Mousetrap;
 }) (Mousetrap);
