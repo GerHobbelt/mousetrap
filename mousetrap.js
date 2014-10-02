@@ -17,7 +17,7 @@
  * Mousetrap is a simple keyboard shortcut library for Javascript with
  * no external dependencies
  *
- * @version 1.4.6
+ * @version 1.4.8
  * @url craig.is/killing/mice
  */
 (function(window, document, undefined) {
@@ -31,7 +31,8 @@
      *
      * @type {Object}
      */
-    var _MAP = {
+    var _IS_MAC = /Mac|iPod|iPhone|iPad/.test(navigator.platform),
+        _MAP = {
             8: 'backspace',
             9: 'tab',
             13: 'enter',
@@ -115,6 +116,10 @@
             '|': '\\'
         },
 
+        _MAC_ALT_MAP = {
+            192: 'n'
+        },
+
         /**
          * this is a list of special strings you can use to map
          * to modifier keys when you specify your keyboard shortcuts
@@ -126,7 +131,7 @@
             'command': 'meta',
             'return': 'enter',
             'escape': 'esc',
-            'mod': /Mac|iPod|iPhone|iPad/.test(navigator.platform) ? 'meta' : 'ctrl'
+            'mod': _IS_MAC ? 'meta' : 'ctrl'
         },
 
         /**
@@ -256,9 +261,15 @@
         }
 
         // for non keypress events the special maps are needed
+
+        if(_IS_MAC && e.altKey && _MAC_ALT_MAP[e.which]) {
+            return _MAC_ALT_MAP[e.which];
+        }
+
         if (_MAP[e.which]) {
             return _MAP[e.which];
         }
+        
 
         if (_KEYCODE_MAP[e.which]) {
             return _KEYCODE_MAP[e.which];
