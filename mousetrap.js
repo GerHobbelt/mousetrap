@@ -955,6 +955,17 @@
         },
 
         /**
+         * returns the registered callback for a given combination
+         * 
+         * @param  {string} combination
+         * @param  {string=} action
+         * @return {Function}
+         */
+        getCallback: function(combination, action) {
+            return _directMap[combination + ':' + action];
+        },
+
+        /**
          * exposes _handleKey publicly so it can be overwritten by extensions
          */
         handleKey: _handleKey
