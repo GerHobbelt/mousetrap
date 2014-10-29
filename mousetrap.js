@@ -20,7 +20,15 @@
  * @version 1.4.6
  * @url craig.is/killing/mice
  */
-(function(window, document, undefined) {
+(function(undefined) {
+
+    /*
+    if(window === undefined || window.document === undefined) {
+      throw new Error('Mousetrap needs a browser environment to run.');
+    }
+    */
+
+    var document = window.document;
 
     /**
      * mapping of special keycodes to their corresponding keys
@@ -943,11 +951,11 @@
         handleKey: _handleKey
     };
 
-    // expose mousetrap to the global object
-    window.Mousetrap = Mousetrap;
-
-    // expose mousetrap as an AMD module
     if (typeof define === 'function' && define.amd) {
-        define(Mousetrap);
+      define(Mousetrap);
+    } else if (typeof module !== 'undefined' && module.exports) {
+      module.exports = Mousetrap;
+    } else if (typeof this !== 'undefined') {
+      this['Mousetrap'] = Mousetrap;
     }
-}) (window, document);
+}).call(this);
