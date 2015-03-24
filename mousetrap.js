@@ -214,7 +214,7 @@
      */
     function _addEvent(object, type, callback) {
         if (object.addEventListener) {
-            object.addEventListener(type, callback, false);
+            object.addEventListener(type, callback, true);
             return;
         }
 
