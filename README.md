@@ -52,6 +52,15 @@ If you would like to donate to help support Mousetrap development use [Gittip](h
         Mousetrap.bind('up up down down left right left right b a enter', function() {
             console.log('konami code');
         });
+        
+        // custom key map, only fired with the keyup event
+        var testMap = [];
+        testMap[14] = "remote-play";
+        testMap[15] = "remote-pause";
+        
+        Mousetrap.addCustomMap(testMap);        
+        Mousetrap.bind('remote-play', function() { console.log('remote play btn pressed', 'keyup');
+        Mousetrap.bind('remote-pause', function() { console.log('remote pause btn pressed', 'keyup');
     </script>
     ```
 

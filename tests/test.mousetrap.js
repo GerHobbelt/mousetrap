@@ -687,7 +687,6 @@ describe('wrapping a specific element', function() {
 
         var testMap = [];
         testMap[14] = "remote-play";
-        testMap[15] = "remote-pause";
 
         Mousetrap.addCustomMap(testMap);
 
