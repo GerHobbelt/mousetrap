@@ -17,7 +17,7 @@
  * Mousetrap is a simple keyboard shortcut library for Javascript with
  * no external dependencies
  *
- * @version 1.5.3
+ * @version 1.5.4
  * @url craig.is/killing/mice
  */
 (function(window, document, undefined) {
@@ -609,6 +609,19 @@
         }
 
         /**
+         * adds key/value pairs to keyboard map
+         *
+         *
+         * @param {Array} map
+         * @returns void
+         */
+        self._addCustomMap = function(map) {
+            for(var key in map){
+                _MAP[key] = map[key];
+            }
+        };
+
+        /**
          * handles a character key event
          *
          * @param {string} character
@@ -981,6 +994,14 @@
     Mousetrap.prototype.handleKey = function() {
         var self = this;
         return self._handleKey.apply(self, arguments);
+    };
+
+    /**
+     * exposes _addCustomMap publicly so it can be overwritten by extensions
+     */
+    Mousetrap.prototype.addCustomMap = function() {
+        var self = this;
+        return self._addCustomMap.apply(self, arguments);
     };
 
     /**

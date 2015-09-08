@@ -681,4 +681,23 @@ describe('wrapping a specific element', function() {
         expect(spy.args[0][0]).to.be.an.instanceOf(Event, 'first argument should be Event');
         expect(spy.args[0][1]).to.equal('a', 'second argument should be key combo');
     });
+
+    it('should work when adding a custom map', function() {
+        var spy = sinon.spy();
+
+        var testMap = [];
+        testMap[14] = "remote-play";
+        testMap[15] = "remote-pause";
+
+        Mousetrap.addCustomMap(testMap);
+
+        var mousetrap = new Mousetrap();
+        mousetrap.bind('remote-play', spy, 'keyup');
+
+        KeyEvent.simulate(0, 14);
+
+        expect(spy.callCount).to.equal(1, 'callback should fire');
+        expect(spy.args[0][1]).to.equal('remote-play', 'callback should match "remote-play"');
+    });
+
 });
